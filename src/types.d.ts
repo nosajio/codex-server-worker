@@ -1,16 +1,12 @@
-import { KVNamespace } from '@cloudflare/workers-types'
+import { KVNamespace } from '@cloudflare/workers-types';
 
 declare global {
-  const codex_store: KVNamespace
-  type GitHubContentResponse = {
-    ad_url: string
-    git_url: string
-    html_url: string
-    name: string
-    path: string
-    sha: string
-    size: number
-    type: string
-    url: string
+  const codex_store: KVNamespace;
+  interface PostFile {
+    filename: string;
+    contentURI: string;
+    body: string;
+    slug: string;
+    date: Date;
   }
 }
