@@ -6,6 +6,7 @@ export enum Methods {
 type Route = {
   match: RegExp | string;
   method: Methods;
+  name: string;
   params?: TokenizedPath;
   handler(req: Request, params?: Params): Promise<Response> | Response;
 };
@@ -29,6 +30,7 @@ const createRoute = (
   method: Methods,
 ): Route => {
   const route: Route = {
+    name: String(pattern),
     match: pattern,
     method,
     handler,
@@ -98,8 +100,8 @@ export default class Router implements RouterI {
     return route.handler(req, params);
   }
 
-  async get(pattern: Route['match'], handler: Route['handler']) {
-    const routeExists = this.routes.some(r => r.match === pattern);
+  get(pattern: Route['match'], handler: Route['handler']) {
+    const routeExists = this.routes.some(r => r.name === String(pattern));
     if (routeExists) {
       throw new Error(`${String(pattern)} already exists`);
     }
