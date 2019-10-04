@@ -104,13 +104,23 @@ describe('Router', () => {
   });
 
   test('can match variable params and return values', async () => {
+    expect.assertions(2);
     r.get(
       '/post/:postName',
       (req, params) => new Response((params || {}).postName),
     );
+    r.get(
+      '/post/:one/:two',
+      (req, params) =>
+        new Response(`${(params || {}).one} ${(params || {}).two}`),
+    );
     const res = await r.handleRoute(
       new Request('http://example.com/post/hello-there', { method: 'get' }),
     );
+    const res2 = await r.handleRoute(
+      new Request('http://example.com/post/hello/world', { method: 'GET' }),
+    );
     expect(res.body).toBe('hello-there');
+    expect(res2.body).toBe('hello world');
   });
 });
