@@ -29,5 +29,8 @@ export async function handleRequest(event: FetchEvent): Promise<Response> {
     return new Response(JSON.stringify(post));
   });
 
-  return router.handleRoute(event.request);
+  const response = await router.handleRoute(event.request);
+  response.headers.set( 'content-type', 'application/json');
+
+  return response;
 }

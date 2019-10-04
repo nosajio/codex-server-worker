@@ -18,7 +18,7 @@ type Params = {
 interface RouterI {
   routes: Route[];
   match(pattern: RegExp, method: Methods, request: Request): Boolean;
-  handleRoute(req: Request): Response | Promise<Response>;
+  handleRoute(req: Request): Promise<Response>;
   get(pattern: RegExp, handler: Route['handler']): void;
 }
 
@@ -88,7 +88,7 @@ export default class Router implements RouterI {
 
   constructor() {}
 
-  handleRoute(req: Request) {
+  async handleRoute(req: Request) {
     const route = this.routes.find(r => this.match(r.match, r.method, req));
     if (!route) {
       return defaultRouteHandler(req);
@@ -97,7 +97,7 @@ export default class Router implements RouterI {
     let params: Params | undefined = route.params
       ? getParams(route.params, req.url)
       : undefined;
-    return route.handler(req, params);
+    return await route.handler(req, params);
   }
 
   get(pattern: Route['match'], handler: Route['handler']) {
