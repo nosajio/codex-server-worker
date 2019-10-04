@@ -88,7 +88,7 @@ export default class Router implements RouterI {
 
   constructor() {}
 
-  async handleRoute(req: Request) {
+  handleRoute(req: Request) {
     const route = this.routes.find(r => this.match(r.match, r.method, req));
     if (!route) {
       return defaultRouteHandler(req);
