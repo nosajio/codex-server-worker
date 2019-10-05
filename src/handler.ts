@@ -1,3 +1,4 @@
+import { fixUTF8Encoding } from './utils/encoding';
 import { getAllPostsFromStore } from './utils/store';
 import Router from './utils/router';
 
@@ -14,7 +15,7 @@ export async function handleRequest(event: FetchEvent): Promise<Response> {
   );
 
   router.get('/posts', () => {
-    return new Response(JSON.stringify(posts));
+    return new Response(fixUTF8Encoding(JSON.stringify(posts)));
   });
 
   router.get('/posts/:slug', (req, params) => {
@@ -26,11 +27,11 @@ export async function handleRequest(event: FetchEvent): Promise<Response> {
     if (!post) {
       return new Response(`The post ${slug} cannot be found`, { status: 404 });
     }
-    return new Response(JSON.stringify(post));
+    return new Response(fixUTF8Encoding(JSON.stringify(post)));
   });
 
   const response = await router.handleRoute(event.request);
-  response.headers.set( 'content-type', 'application/json');
+  response.headers.set('content-type', 'application/json');
 
   return response;
 }
