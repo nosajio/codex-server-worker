@@ -93,7 +93,8 @@ export default class Router implements RouterI {
     if (!route) {
       return defaultRouteHandler(req);
     }
-    // Handle routes with paramaters by matching incoming path with pre-compiled tokens
+    // Handle routes with paramaters by matching incoming path with pre-compiled
+    // tokens
     let params: Params | undefined = route.params
       ? getParams(route.params, req.url)
       : undefined;
