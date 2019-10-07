@@ -11,7 +11,7 @@ type Route = {
   handler(req: Request, params?: Params): Promise<Response> | Response;
 };
 
-type Params = {
+export type Params = {
   [name: string]: string;
 };
 

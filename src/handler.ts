@@ -1,57 +1,23 @@
-import { fixUTF8Encoding } from './utils/encoding';
-import { getAllPostsFromStore } from './utils/store';
+import { corsMethods, corsURLs } from './config/cors';
+import handleDefaultRoute from './routes/default';
+import handlePostRoute from './routes/post';
+import handlePostsRoute from './routes/posts';
 import Router from './utils/router';
-import { corsURLs, corsMethods } from './config/cors';
+import { getAllPostsFromStore } from './utils/store';
 
 export async function handleRequest(event: FetchEvent): Promise<Response> {
   const posts: PostFile[] = await getAllPostsFromStore(codex_store);
   const router = new Router();
-  const cache = caches.default;
   const origin = event.request.headers.get('Origin');
+  const cache = caches.default;
 
-  router.get('/', req => {
-    return new Response(
-      'Use /posts/:slug to access individual posts, and /posts to see all posts',
-    );
-  });
+  // Register route handlers
+  router.get('/', handleDefaultRoute);
+  router.get('/posts', handlePostsRoute(posts, cache));
+  router.get('/posts/:slug', handlePostRoute(posts, cache));
 
-  router.get('/posts', async req => {
-    let res = await cache.match(req);
-
-    // Check cache for posts response first
-    if (res) {
-      return res;
-    }
-
-    // When cached version isn't available, serve k/v posts
-    res = new Response(fixUTF8Encoding(JSON.stringify(posts)));
-    return res;
-  });
-
-  router.get('/posts/:slug', async (req, params) => {
-    if (!params) {
-      return new Response('Need params', { status: 404 });
-    }
-
-    let res = await cache.match(req);
-
-    // Check Cache for cached response
-    if (res) {
-      return res;
-    }
-
-    // When cached post isn't available, return k/v stored version
-    const { slug } = params;
-    const post = posts.find(p => p.slug === slug);
-
-    if (!post) {
-      return new Response(`The post ${slug} cannot be found`, { status: 404 });
-    }
-
-    res = new Response(fixUTF8Encoding(JSON.stringify(post)));
-    return res;
-  });
-
+  // Run the route handler with the current request, so the appropriate route
+  // handler will be triggered
   const response = await router.handleRoute(event.request);
 
   // Set content type header so that clients don't confuse the response with
@@ -66,7 +32,10 @@ export async function handleRequest(event: FetchEvent): Promise<Response> {
     if (!foundHost) {
       return response;
     }
-    response.headers.set('Access-Control-Allow-Origin', `${originURL.protocol}//${foundHost}`);
+    response.headers.set(
+      'Access-Control-Allow-Origin',
+      `${originURL.protocol}//${foundHost}`,
+    );
     response.headers.set(
       'Access-Control-Allow-Methods',
       corsMethods.join(', '),
